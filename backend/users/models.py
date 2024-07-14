@@ -7,7 +7,7 @@ class CustomUser(AbstractUser):
         max_length=254, unique=True, blank=False, null=False
     )
     first_name = models.CharField(max_length=150, blank=False, null=False)
-    last_name = models.CharField(max_length=150, blank=True, null=False)
+    last_name = models.CharField(max_length=150, blank=False, null=False)
     # TODO: Добавить аватар
 
     USERNAME_FIELD = 'email'
