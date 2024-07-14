@@ -144,3 +144,6 @@ media/
 # ruff
 .ruff_cache/
 ruff.toml
+
+# FIXME: Убрать перед релизом
+migrations/
