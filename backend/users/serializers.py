@@ -25,3 +25,7 @@ class CustomCreateUserSerializer(UserCreateSerializer):
         model = User
         fields = ('id', 'email', 'first_name', 'last_name', 'username', 'password')
         extra_kwargs = {'password': {'write_only': True}}
+
+
+class AvatarSerializer(serializers.Serializer):
+    avatar = Base64ImageField()
