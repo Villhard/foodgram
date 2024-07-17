@@ -7,13 +7,23 @@ from users.serializers import AvatarSerializer
 
 User = get_user_model()
 
+
 class UserViewSet(DjoserViewSet):
-    @action(methods=('get',), detail=False, permission_classes=[IsAuthenticated])
+    @action(
+        methods=('get',),
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    @action(methods=('put', 'delete'), detail=False, permission_classes=[IsAuthenticated], url_path='me/avatar')
+    @action(
+        methods=('put', 'delete'),
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='me/avatar',
+    )
     def avatar(self, request):
         user = request.user
 
