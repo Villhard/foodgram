@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DjangoFilterBackend
-from api.serializers import TagSerializer, IngredientSerializer
-from recipes.models import Tag, Ingredient
+from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer
+from recipes.models import Tag, Ingredient, Recipe
 
 
 class TagViewSet(
@@ -24,3 +24,14 @@ class IngredientViewSet(
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name',)
+
+
+class RecipeViewSet(
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
