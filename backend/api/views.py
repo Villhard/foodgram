@@ -26,10 +26,7 @@ class IngredientViewSet(
     filterset_fields = ('name',)
 
 
-class RecipeViewSet(
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet,
-):
+class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
 
