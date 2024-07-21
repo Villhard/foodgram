@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import MethodNotAllowed
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Tag, Ingredient, RecipeIngredient, Recipe
 from users.serializers import CustomUserSerializer
@@ -58,6 +59,18 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         return False
 
+    @staticmethod
+    def validate_ingredients(value):
+        if len(value) == 0:
+            raise serializers.ValidationError('Для создания рецепта необходим хотя бы один ингредиент')
+        return value
+
+    @staticmethod
+    def validate_tags(value):
+        if len(value) == 0:
+            raise serializers.ValidationError('Для создания рецепта необходим хотя бы один тег')
+        return value
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -70,7 +83,36 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount'],
                 )
         return recipe
-    
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        if request.method == 'PUT':
+            raise MethodNotAllowed('PUT')
+
+        required_fields = ['id', 'name', 'text', 'cooking_time', 'tags', 'ingredients']
+        for field in required_fields:
+            if field not in validated_data:
+                raise serializers.ValidationError({field: 'This field is required'})
+
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        instance.tags.set(tags)
+        instance.recipeingredient_set.all().delete()
+
+        for ingredient in ingredients:
+            RecipeIngredient.objects.create(
+                recipe=instance,
+                ingredient=ingredient['ingredient'],
+                amount=ingredient['amount'],
+                )
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+
+        return instance
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['ingredients'] = data.pop('ingredients_detail')
