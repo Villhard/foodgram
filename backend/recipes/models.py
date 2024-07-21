@@ -31,7 +31,9 @@ class Recipe(models.Model):
         Ingredient, through='RecipeIngredient', related_name='recipes'
     )
     tags = models.ManyToManyField(Tag, related_name='recipes')
-    image = models.ImageField(upload_to='media/recipies/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to='media/recipies/', blank=True, null=True
+    )
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
 

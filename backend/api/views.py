@@ -1,6 +1,10 @@
 from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DjangoFilterBackend
-from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer
+from api.serializers import (
+    TagSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+)
 from recipes.models import Tag, Ingredient, Recipe
 
 
