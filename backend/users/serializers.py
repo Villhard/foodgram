@@ -11,7 +11,7 @@ class CustomUserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField()
 
-    # FIXME: Настроить логику определения подписки
+    # FIXME: Implement
     def get_is_subscribed(self, obj):
         return False
 
