@@ -65,7 +65,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_ingredients(value):
-        if len(value) == 0:
+        if not value:
             raise serializers.ValidationError(
                 'Для создания рецепта необходим хотя бы один ингредиент'
             )
@@ -73,7 +73,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate_tags(value):
-        if len(value) == 0:
+        if not value:
             raise serializers.ValidationError(
                 'Для создания рецепта необходим хотя бы один тег'
             )
