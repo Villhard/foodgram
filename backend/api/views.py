@@ -6,6 +6,7 @@ from api.serializers import (
     RecipeSerializer,
 )
 from recipes.models import Tag, Ingredient, Recipe
+from api.permissions import IsAuthorOrReadOnly
 
 
 class TagViewSet(
@@ -33,6 +34,7 @@ class IngredientViewSet(
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
