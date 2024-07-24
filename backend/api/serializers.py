@@ -121,7 +121,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise MethodNotAllowed('PUT')
 
         required_fields = [
-            'id',
             'name',
             'text',
             'cooking_time',
