@@ -69,6 +69,14 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Для создания рецепта необходим хотя бы один ингредиент'
             )
+        ingredients = []
+        for item in value:
+            ingredient = item['ingredient']
+            if ingredient in ingredients:
+                raise serializers.ValidationError(
+                    'Ингредиенты не должны повторяться'
+                )
+            ingredients.append(ingredient)
         return value
 
     @staticmethod
@@ -77,12 +85,26 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Для создания рецепта необходим хотя бы один тег'
             )
+        if len(value) > len(set(value)):
+            raise serializers.ValidationError(
+                'Теги не должны повторяться'
+            )
+        return value
+
+    @staticmethod
+    def validate_image(value):
+        if not value:
+            raise serializers.ValidationError(
+                'Для создания рецепта необходимо загрузить изображение'
+            )
         return value
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(
+            author=self.context['request'].user, **validated_data
+        )
         recipe.tags.set(tags)
         for ingredient in ingredients:
             RecipeIngredient.objects.create(
