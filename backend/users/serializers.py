@@ -12,7 +12,8 @@ class CustomUserSerializer(UserSerializer):
     avatar = Base64ImageField()
 
     # FIXME: Implement
-    def get_is_subscribed(self, obj):
+    @staticmethod
+    def get_is_subscribed(obj):
         return False
 
     class Meta:
