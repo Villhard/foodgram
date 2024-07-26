@@ -34,7 +34,9 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='media/recipies/', blank=True, null=True
     )
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='recipes'
+    )
 
 
 class RecipeIngredient(models.Model):
