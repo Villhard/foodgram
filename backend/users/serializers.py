@@ -11,10 +11,11 @@ class CustomUserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField()
 
-    # FIXME: Implement
-    @staticmethod
-    def get_is_subscribed(obj):
-        return False
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.following.filter(follower=user).exists()
 
     class Meta:
         model = User
@@ -62,6 +63,18 @@ class ExtendedCustomUserSerializer(CustomUserSerializer):
     @staticmethod
     def get_recipes_count(obj):
         return obj.recipes.count()
+
+    def to_representation(self, instance):
+        from api.serializers import ShortRecipeSerializer
+        request = self.context.get('request')
+        recipes_limit = request.query_params.get('recipes_limit')
+        recipes = instance.recipes.all()
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        user_data = CustomUserSerializer(instance, context=self.context).data
+        user_data['recipes'] = ShortRecipeSerializer(recipes, many=True).data
+        user_data['recipes_count'] = instance.recipes.count()
+        return user_data
 
     class Meta:
         model = User

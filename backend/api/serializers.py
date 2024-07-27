@@ -55,13 +55,17 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
-    # FIXME: Implement
     def get_is_favorited(self, obj):
-        return False
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.favorites.filter(user=user).exists()
 
-    # FIXME: Implement
     def get_is_in_shopping_cart(self, obj):
-        return False
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.shopping_cart.filter(user=user).exists()
 
     @staticmethod
     def validate_ingredients(value):

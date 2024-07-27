@@ -1,4 +1,6 @@
 from io import StringIO
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework import viewsets, mixins
 from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
@@ -17,6 +19,7 @@ from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from favorites.models import Favorite
 from shopping.models import ShoppingCart
 from api.permissions import IsAuthorOrReadOnly
+from api.filters import RecipeFilter
 
 
 class TagViewSet(
@@ -45,6 +48,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     @action(
         detail=True,
@@ -78,7 +83,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=400,
                 )
 
-    # FIXME: refactor this method
     @action(
         detail=True,
         methods=('post', 'delete'),
@@ -119,7 +123,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         ingredients = RecipeIngredient.objects.filter(
-            recipe__in_cart__user=request.user
+            recipe__shopping_cart__user=request.user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit',
@@ -138,3 +142,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'attachment; filename="shopping_cart.txt"'
         )
         return response
+
+    @action(
+        detail=True,
+        methods=["GET"],
+        url_path="get-link",
+    )
+    def get_link(self, request, pk):
+        get_object_or_404(Recipe, id=pk)
+        return Response(
+            {"short-link": f"localhost:8000/api/recipes/{pk}"},
+            status=status.HTTP_200_OK
+        )
