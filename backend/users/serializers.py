@@ -51,10 +51,12 @@ class ExtendedCustomUserSerializer(CustomUserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
-    def get_recipes(self, obj):
-        from api.serializers import RecipeSerializer
+    @staticmethod
+    def get_recipes(obj):
+        from api.serializers import ShortRecipeSerializer
+
         recipes = obj.recipes.all()
-        serializer = RecipeSerializer(recipes, many=True, context=self.context)
+        serializer = ShortRecipeSerializer(recipes, many=True)
         return serializer.data
 
     @staticmethod
