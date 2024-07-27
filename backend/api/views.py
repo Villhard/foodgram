@@ -1,4 +1,6 @@
 from io import StringIO
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework import viewsets, mixins
 from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
@@ -140,3 +142,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'attachment; filename="shopping_cart.txt"'
         )
         return response
+
+    @action(
+        detail=True,
+        methods=["GET"],
+        url_path="get-link",
+    )
+    def get_link(self, request, pk):
+        get_object_or_404(Recipe, id=pk)
+        return Response(
+            {"short-link": f"localhost:8000/api/recipes/{pk}"},
+            status=status.HTTP_200_OK
+        )
