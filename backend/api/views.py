@@ -20,6 +20,7 @@ from favorites.models import Favorite
 from shopping.models import ShoppingCart
 from api.permissions import IsAuthorOrReadOnly
 from api.filters import RecipeFilter
+from backend.settings import HOST
 
 
 class TagViewSet(
@@ -151,6 +152,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_link(self, request, pk):
         get_object_or_404(Recipe, id=pk)
         return Response(
-            {"short-link": f"localhost:8000/api/recipes/{pk}"},
+            {"short-link": f"{HOST}/recipes/{pk}"},
             status=status.HTTP_200_OK
         )

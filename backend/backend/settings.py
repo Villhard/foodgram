@@ -9,6 +9,8 @@ SECRET_KEY = (
 
 DEBUG = True
 
+HOST = 'http://localhost:8000'
+
 ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.CustomUser'
