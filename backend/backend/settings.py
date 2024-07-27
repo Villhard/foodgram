@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
     'favorites.apps.FavoritesConfig',
+    'shopping.apps.ShoppingConfig',
 ]
 # fmt: on
 
