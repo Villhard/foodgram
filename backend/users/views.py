@@ -48,12 +48,20 @@ class UserViewSet(DjoserViewSet):
         detail=False,
         permission_classes=(IsAuthenticated,),
         serializer_class=ExtendedCustomUserSerializer,
-        url_path='me/subscriptions',
+        url_path='subscriptions',
     )
     def subscriptions(self, request):
         user = request.user
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
+        subscriptions = Subscription.objects.filter(follower=user)
+        following_users = [
+            subscription.following for subscription in subscriptions
+        ]
+
+        paginator = self.paginator
+        result_page = paginator.paginate_queryset(following_users, request)
+
+        serializer = self.get_serializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @action(
         methods=('post', 'delete'),
