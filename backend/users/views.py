@@ -70,7 +70,7 @@ class UserViewSet(DjoserViewSet):
         serializer_class=ExtendedCustomUserSerializer,
         url_path='subscribe',
     )
-    def subscribe(self, request, id=None):
+    def subscribe(self, request, id):
         user = request.user
         author = self.get_object()
 
