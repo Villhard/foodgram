@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db.utils import IntegrityError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -66,23 +67,31 @@ class UserViewSet(DjoserViewSet):
         author = self.get_object()
 
         if request.method == 'POST':
-            if not user.following.filter(id=author.id).exists():
-                subcsription = Subscription.objects.create(
+            if user == author:
+                return Response(
+                    {'detail': 'Нельзя подписаться на самого себя'},
+                    status=400
+                )
+            try:
+                Subscription.objects.create(
                     follower=user, following=author
                 )
                 serializer = self.get_serializer(author)
                 return Response(serializer.data, status=201)
-            else:
+            except IntegrityError:
                 return Response(
                     {'detail': 'Вы уже подписаны на этого автора'},
                     status=400
                 )
         elif request.method == 'DELETE':
-            if not user.following.filter(id=author.id).exists():
+            subcription = Subscription.objects.filter(
+                follower=user, following=author
+            )
+            if subcription.exists():
+                subcription.delete()
+                return Response(status=204)
+            else:
                 return Response(
                     {'detail': 'Вы не подписаны на этого автора'},
                     status=400
                 )
-            else:
-                user.following.get(id=author.id).delete()
-                return Response(status=204)
