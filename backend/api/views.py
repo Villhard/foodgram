@@ -17,6 +17,7 @@ from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from favorites.models import Favorite
 from shopping.models import ShoppingCart
 from api.permissions import IsAuthorOrReadOnly
+from api.filters import RecipeFilter
 
 
 class TagViewSet(
@@ -45,6 +46,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     @action(
         detail=True,
