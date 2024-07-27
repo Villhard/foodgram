@@ -81,7 +81,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=400,
                 )
 
-    # FIXME: refactor this method
     @action(
         detail=True,
         methods=('post', 'delete'),
@@ -122,7 +121,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         ingredients = RecipeIngredient.objects.filter(
-            recipe__in_cart__user=request.user
+            recipe__shopping_cart__user=request.user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit',

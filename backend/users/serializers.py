@@ -11,10 +11,11 @@ class CustomUserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField()
 
-    # FIXME: Implement
-    @staticmethod
-    def get_is_subscribed(obj):
-        return False
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.following.filter(follower=user).exists()
 
     class Meta:
         model = User
