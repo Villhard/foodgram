@@ -123,13 +123,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def download_shopping_cart(self, request):
-        ingredients = RecipeIngredient.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit',
-        ).annotate(
-            total_amount=models.Sum('amount')
+        ingredients = (
+            RecipeIngredient.objects.filter(
+                recipe__shopping_cart__user=request.user
+            )
+            .values(
+                'ingredient__name',
+                'ingredient__measurement_unit',
+            )
+            .annotate(total_amount=models.Sum('amount'))
         )
         output = StringIO()
         output.write('Список покупок:\n')
@@ -146,12 +148,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=["GET"],
-        url_path="get-link",
+        methods=['GET'],
+        url_path='get-link',
     )
     def get_link(self, request, pk):
         get_object_or_404(Recipe, id=pk)
         return Response(
-            {"short-link": f"{HOST}/recipes/{pk}"},
-            status=status.HTTP_200_OK
+            {'short-link': f'{HOST}/recipes/{pk}'}, status=status.HTTP_200_OK
         )

@@ -90,9 +90,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Для создания рецепта необходим хотя бы один тег'
             )
         if len(value) > len(set(value)):
-            raise serializers.ValidationError(
-                'Теги не должны повторяться'
-            )
+            raise serializers.ValidationError('Теги не должны повторяться')
         return value
 
     @staticmethod

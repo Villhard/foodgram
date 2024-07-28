@@ -77,19 +77,15 @@ class UserViewSet(DjoserViewSet):
         if request.method == 'POST':
             if user == author:
                 return Response(
-                    {'detail': 'Нельзя подписаться на самого себя'},
-                    status=400
+                    {'detail': 'Нельзя подписаться на самого себя'}, status=400
                 )
             try:
-                Subscription.objects.create(
-                    follower=user, following=author
-                )
+                Subscription.objects.create(follower=user, following=author)
                 serializer = self.get_serializer(author)
                 return Response(serializer.data, status=201)
             except IntegrityError:
                 return Response(
-                    {'detail': 'Вы уже подписаны на этого автора'},
-                    status=400
+                    {'detail': 'Вы уже подписаны на этого автора'}, status=400
                 )
         elif request.method == 'DELETE':
             subcription = Subscription.objects.filter(
@@ -100,6 +96,5 @@ class UserViewSet(DjoserViewSet):
                 return Response(status=204)
             else:
                 return Response(
-                    {'detail': 'Вы не подписаны на этого автора'},
-                    status=400
+                    {'detail': 'Вы не подписаны на этого автора'}, status=400
                 )

@@ -4,11 +4,21 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     email = models.EmailField(
-        max_length=254, unique=True, blank=False, null=False, verbose_name='Email'
+        max_length=254,
+        unique=True,
+        blank=False,
+        null=False,
+        verbose_name='Email',
     )
-    first_name = models.CharField(max_length=150, blank=False, null=False, verbose_name='Имя')
-    last_name = models.CharField(max_length=150, blank=False, null=False, verbose_name='Фамилия')
-    avatar = models.ImageField(upload_to='media/users/', blank=True, null=True, verbose_name='Аватар')
+    first_name = models.CharField(
+        max_length=150, blank=False, null=False, verbose_name='Имя'
+    )
+    last_name = models.CharField(
+        max_length=150, blank=False, null=False, verbose_name='Фамилия'
+    )
+    avatar = models.ImageField(
+        upload_to='media/users/', blank=True, null=True, verbose_name='Аватар'
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
@@ -24,10 +34,16 @@ class CustomUser(AbstractUser):
 
 class Subscription(models.Model):
     follower = models.ForeignKey(
-        CustomUser, related_name='following', on_delete=models.CASCADE, verbose_name='Подписчик'
+        CustomUser,
+        related_name='following',
+        on_delete=models.CASCADE,
+        verbose_name='Подписчик',
     )
     following = models.ForeignKey(
-        CustomUser, related_name='followers', on_delete=models.CASCADE, verbose_name='Автор'
+        CustomUser,
+        related_name='followers',
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
     )
 
     class Meta:

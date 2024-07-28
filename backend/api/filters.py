@@ -23,9 +23,7 @@ class RecipeFilter(FilterSet):
             'is_favorited': 'favorites__user',
         }
         if value and not self.request.user.is_anonymous:
-            return queryset.filter(
-                **{query_params[name]: self.request.user}
-            )
+            return queryset.filter(**{query_params[name]: self.request.user})
         return queryset
 
     class Meta:

@@ -66,11 +66,12 @@ class ExtendedCustomUserSerializer(CustomUserSerializer):
 
     def to_representation(self, instance):
         from api.serializers import ShortRecipeSerializer
+
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
         recipes = instance.recipes.all()
         if recipes_limit:
-            recipes = recipes[:int(recipes_limit)]
+            recipes = recipes[: int(recipes_limit)]
         user_data = CustomUserSerializer(instance, context=self.context).data
         user_data['recipes'] = ShortRecipeSerializer(recipes, many=True).data
         user_data['recipes_count'] = instance.recipes.count()
