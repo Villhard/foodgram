@@ -1,0 +1,29 @@
+version: '3'
+
+volumes:
+  static:
+  media:
+
+services:
+  backend:
+    build: ./backend
+    volumes:
+      - static:/backend_static
+      - media:/app/media
+
+  frontend:
+    build: ./frontend
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static:/frontend_static
+
+  gateway:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static:/staticfiles/
+      - media:/app/media
+    depends_on:
+      - backend
+      - frontend
