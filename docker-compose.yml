@@ -6,19 +6,20 @@ volumes:
   media:
 
 services:
-#  db:
-#    image: postgres:13
-#    env_file: .env
-#    volumes:
-#      - pg_data:/var/lib/postgresql/data/
+  db:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
 
   backend:
     build: ./backend/
+    env_file: .env
     volumes:
       - static:/backend_static/
       - media:/app/media/
-#    depends_on:
-#      - db
+    depends_on:
+      - db
 
   frontend:
     build: ./frontend/
@@ -28,7 +29,7 @@ services:
 
   gateway:
     build: ./nginx/
-#    env_file: .env
+    env_file: .env
     ports:
       - "80:80"
     volumes:
