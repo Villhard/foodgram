@@ -2,8 +2,8 @@ version: '3'
 
 volumes:
   pg_data:
-  static:
-  media:
+  foodgram_static:
+  foodgram_media:
 
 services:
   db:
@@ -13,28 +13,30 @@ services:
       - pg_data:/var/lib/postgresql/data/
 
   backend:
+    container_name: foodgram-back
     build: ./backend/
     env_file: .env
     volumes:
-      - static:/backend_static/
-      - media:/app/media/
+      - foodgram_static:/backend_static/
+      - foodgram_media:/app/media/
     depends_on:
       - db
 
   frontend:
+    container_name: foodgram-front
     build: ./frontend/
     volumes:
-      - static:/frontend_static/
-    command: cp -r /app/build/. /frontend_static/
+      - foodgram_static:/app/result_build/
 
   gateway:
+    container_name: foodgram-gate
     build: ./nginx/
     env_file: .env
     ports:
       - "80:80"
     volumes:
-      - static:/staticfiles/
-      - media:/media/:ro
+      - foodgram_static:/staticfiles/
+      - foodgram_media:/media/:ro
     depends_on:
       - backend
       - frontend
