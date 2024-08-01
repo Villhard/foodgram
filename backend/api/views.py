@@ -19,7 +19,7 @@ from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from favorites.models import Favorite
 from shopping.models import ShoppingCart
 from api.permissions import IsAuthorOrReadOnly
-from api.filters import RecipeFilter
+from api.filters import RecipeFilter, IngredientFilter
 from backend.settings import HOST
 
 
@@ -42,7 +42,7 @@ class IngredientViewSet(
     serializer_class = IngredientSerializer
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name',)
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
