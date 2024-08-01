@@ -137,7 +137,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         output.write('Список покупок:\n')
         for ingredient in ingredients:
             output.write(
-                f'{ingredient["ingredient__name"]} - {ingredient["total_amount"]} '
+                f'{ingredient["ingredient__name"]} - '
+                f'{ingredient["total_amount"]} '
                 f'{ingredient["ingredient__measurement_unit"]}\n'
             )
         response = Response(output.getvalue(), content_type='text/plain')
