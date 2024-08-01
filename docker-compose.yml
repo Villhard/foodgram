@@ -14,7 +14,7 @@ services:
 
   backend:
     container_name: foodgram-back
-    build: ./backend/
+    image: villhard/foodgram-backend:latest
     env_file: .env
     volumes:
       - foodgram_static:/backend_static/
@@ -24,13 +24,13 @@ services:
 
   frontend:
     container_name: foodgram-front
-    build: ./frontend/
+    image: villhard/foodgram-frontend:latest
     volumes:
       - foodgram_static:/app/result_build/
 
   gateway:
     container_name: foodgram-gate
-    build: ./nginx/
+    image: villhard/foodgram-gateway:latest
     env_file: .env
     ports:
       - "8000:80"
