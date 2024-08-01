@@ -144,3 +144,6 @@ media/
 # ruff
 .ruff_cache/
 ruff.toml
+
+# macos
+.DS_Store
