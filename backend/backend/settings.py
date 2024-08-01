@@ -10,9 +10,9 @@ SECRET_KEY = (
 
 DEBUG = True
 
-HOST = 'http://localhost'
+HOST = 'https://recallcontrol.ru'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['recallcontrol.ru', 'localhost']
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
