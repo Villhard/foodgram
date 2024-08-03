@@ -1,27 +1,25 @@
 from io import StringIO
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins
-from django.db import models
-from django_filters.rest_framework import DjangoFilterBackend
-from api.serializers import (
-    TagSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-)
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
-from favorites.models import Favorite
-from shopping.models import ShoppingCart
-from api.permissions import IsAuthorOrReadOnly
-from api.filters import RecipeFilter, IngredientFilter
-from backend.settings import HOST
-from api.mixins import BaseRecipeAction
+
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.decorators import action
+from django.db import models
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
-from api.serializers import AvatarSerializer, ExtendedCustomUserSerializer
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from api.filters import IngredientFilter, RecipeFilter
+from api.mixins import BaseRecipeAction
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (AvatarSerializer, ExtendedCustomUserSerializer,
+                             IngredientSerializer, RecipeSerializer,
+                             TagSerializer)
+from backend.settings import HOST
+from favorites.models import Favorite
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from shopping.models import ShoppingCart
 from users.models import Subscription
 
 User = get_user_model()
