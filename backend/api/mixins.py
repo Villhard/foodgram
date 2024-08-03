@@ -1,5 +1,5 @@
-from http import HTTPStatus
 from rest_framework.response import Response
+from rest_framework import status
 from api.serializers import ShortRecipeSerializer
 
 
@@ -16,21 +16,21 @@ class BaseRecipeAction:
             if instance:
                 return Response(
                     {'detail': err_msg_exist},
-                    status=HTTPStatus.BAD_REQUEST,
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
             model.objects.create(user=user, recipe=recipe)
             serializer = ShortRecipeSerializer(recipe)
             return Response(
                 serializer.data,
-                status=HTTPStatus.CREATED,
+                status=status.HTTP_201_CREATED,
             )
 
         if instance:
             instance.delete()
-            return Response(status=HTTPStatus.NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(
             {'detail': err_msg_not_found},
-            status=HTTPStatus.BAD_REQUEST,
+            status=status.HTTP_400_BAD_REQUEST,
         )

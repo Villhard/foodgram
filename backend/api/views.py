@@ -1,11 +1,10 @@
-from http import HTTPStatus
 from io import StringIO
 from django.shortcuts import get_object_or_404
-from rest_framework import status
 from rest_framework import viewsets, mixins
 from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
@@ -117,5 +116,6 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     def get_link(self, request, pk):
         get_object_or_404(Recipe, id=pk)
         return Response(
-            {'short-link': f'{HOST}/recipes/{pk}'}, status=status.HTTP_200_OK
+            {'short-link': f'{HOST}/recipes/{pk}'},
+            status=status.HTTP_200_OK
         )
