@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.db.utils import IntegrityError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -35,13 +34,11 @@ class UserViewSet(DjoserViewSet):
                 user.avatar = serializer.validated_data['avatar']
                 user.save()
                 return Response({'avatar': user.avatar.url}, status=200)
-            else:
-                return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=400)
 
-        elif request.method == 'DELETE':
-            user.avatar = None
-            user.save()
-            return Response(status=204)
+        user.avatar = None
+        user.save()
+        return Response(status=204)
 
     @action(
         methods=('get',),
@@ -52,10 +49,11 @@ class UserViewSet(DjoserViewSet):
     )
     def subscriptions(self, request):
         user = request.user
-        subscriptions = Subscription.objects.filter(follower=user)
-        following_users = [
-            subscription.following for subscription in subscriptions
-        ]
+
+        subscriptions = Subscription.objects.filter(follower=user).values_list(
+            'following', flat=True
+        )
+        following_users = User.objects.filter(id__in=subscriptions)
 
         paginator = self.paginator
         result_page = paginator.paginate_queryset(following_users, request)
@@ -73,28 +71,29 @@ class UserViewSet(DjoserViewSet):
     def subscribe(self, request, id):
         user = request.user
         author = self.get_object()
+        subcription = Subscription.objects.filter(
+            follower=user, following=author
+        ).first()
 
         if request.method == 'POST':
             if user == author:
                 return Response(
-                    {'detail': 'Нельзя подписаться на самого себя'}, status=400
+                    {'detail': 'Нельзя подписаться на самого себя'},
+                    status=400
                 )
-            try:
-                Subscription.objects.create(follower=user, following=author)
-                serializer = self.get_serializer(author)
-                return Response(serializer.data, status=201)
-            except IntegrityError:
+
+            if subcription:
                 return Response(
                     {'detail': 'Вы уже подписаны на этого автора'}, status=400
                 )
-        elif request.method == 'DELETE':
-            subcription = Subscription.objects.filter(
-                follower=user, following=author
-            )
-            if subcription.exists():
-                subcription.delete()
-                return Response(status=204)
-            else:
-                return Response(
-                    {'detail': 'Вы не подписаны на этого автора'}, status=400
-                )
+
+            Subscription.objects.create(follower=user, following=author)
+            serializer = self.get_serializer(author)
+            return Response(serializer.data, status=201)
+
+        if subcription:
+            subcription.delete()
+            return Response(status=204)
+        return Response(
+            {'detail': 'Вы не подписаны на этого автора'}, status=400
+        )
