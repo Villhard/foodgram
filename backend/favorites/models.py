@@ -22,8 +22,7 @@ class Favorite(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite'
+                fields=['user', 'recipe'], name='unique_favorite'
             )
         ]
         ordering = ('id',)

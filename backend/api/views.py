@@ -52,12 +52,10 @@ class UserViewSet(DjoserViewSet):
                 user.avatar = serializer.validated_data['avatar']
                 user.save()
                 return Response(
-                    {'avatar': user.avatar.url},
-                    status=status.HTTP_200_OK
+                    {'avatar': user.avatar.url}, status=status.HTTP_200_OK
                 )
             return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
             )
 
         user.avatar = None
@@ -121,7 +119,7 @@ class UserViewSet(DjoserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
             {'detail': 'Вы не подписаны на этого автора'},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
 
@@ -162,7 +160,9 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     )
     def favorite(self, request, pk):
         return self.handle_action(
-            request, Favorite, pk,
+            request,
+            Favorite,
+            pk,
             'Рецепт уже добавлен в избранное',
             'Рецепт не найден в избранном',
         )
@@ -175,7 +175,9 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         return self.handle_action(
-            request, ShoppingCart, pk,
+            request,
+            ShoppingCart,
+            pk,
             'Рецепт уже добавлен в список покупок',
             'Рецепт не найден в списке покупок',
         )
@@ -219,6 +221,5 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     def get_link(self, request, pk):
         get_object_or_404(Recipe, id=pk)
         return Response(
-            {'short-link': f'{HOST}/recipes/{pk}'},
-            status=status.HTTP_200_OK
+            {'short-link': f'{HOST}/recipes/{pk}'}, status=status.HTTP_200_OK
         )

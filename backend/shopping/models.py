@@ -22,8 +22,7 @@ class ShoppingCart(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_shopping_cart'
+                fields=['user', 'recipe'], name='unique_shopping_cart'
             )
         ]
         ordering = ('id',)

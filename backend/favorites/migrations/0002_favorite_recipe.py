@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -17,6 +16,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='favorite',
             name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to='recipes.recipe', verbose_name='Рецепт'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='favorites',
+                to='recipes.recipe',
+                verbose_name='Рецепт',
+            ),
         ),
     ]

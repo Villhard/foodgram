@@ -5,8 +5,7 @@ from api.serializers import ShortRecipeSerializer
 
 class BaseRecipeAction:
     def handle_action(
-            self, request, model, pk,
-            err_msg_exist, err_msg_not_found
+        self, request, model, pk, err_msg_exist, err_msg_not_found
     ):
         user = request.user
         recipe = self.get_object()

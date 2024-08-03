@@ -49,8 +49,7 @@ class Subscription(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['follower', 'following'],
-                name='unique_subscription'
+                fields=['follower', 'following'], name='unique_subscription'
             )
         ]
         ordering = ('id',)
