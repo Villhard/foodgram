@@ -21,11 +21,14 @@ from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from shopping.models import ShoppingCart
 from users.models import Subscription
+from api.paginations import CustomPagination
 
 User = get_user_model()
 
 
 class UserViewSet(DjoserViewSet):
+    pagination_class = CustomPagination
+
     @action(
         methods=('get',),
         detail=False,
@@ -146,6 +149,7 @@ class IngredientViewSet(
 class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    pagination_class = CustomPagination
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
