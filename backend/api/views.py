@@ -6,7 +6,6 @@ from rest_framework import viewsets, mixins
 from django.db import models
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
-from django.db.utils import IntegrityError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,7 +13,6 @@ from api.serializers import (
     TagSerializer,
     IngredientSerializer,
     RecipeSerializer,
-    ShortRecipeSerializer,
 )
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 from favorites.models import Favorite
@@ -22,6 +20,7 @@ from shopping.models import ShoppingCart
 from api.permissions import IsAuthorOrReadOnly
 from api.filters import RecipeFilter, IngredientFilter
 from backend.settings import HOST
+from api.mixins import BaseRecipeAction
 
 
 class TagViewSet(
@@ -46,7 +45,7 @@ class IngredientViewSet(
     filterset_class = IngredientFilter
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
@@ -60,29 +59,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk):
-        user = request.user
-        recipe = self.get_object()
-        favorite = Favorite.objects.filter(user=user, recipe=recipe).first()
-        if request.method == 'POST':
-            if favorite:
-                return Response(
-                    {'detail': 'Рецепт уже добавлен в избранное'},
-                    status=HTTPStatus.BAD_REQUEST,
-                )
-            Favorite.objects.create(user=user, recipe=recipe)
-            serializer = ShortRecipeSerializer(recipe)
-            return Response(
-                serializer.data,
-                status=HTTPStatus.CREATED,
-            )
-
-        if favorite:
-            favorite.delete()
-            return Response(status=HTTPStatus.NO_CONTENT)
-
-        return Response(
-            {'detail': 'Рецепт не найден в избранном'},
-            status=HTTPStatus.BAD_REQUEST,
+        return self.handle_action(
+            request, Favorite, pk,
+            'Рецепт уже добавлен в избранное',
+            'Рецепт не найден в избранном',
         )
 
     @action(
@@ -92,30 +72,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def shopping_cart(self, request, pk):
-        if request.method == 'POST':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                ShoppingCart.objects.create(user=user, recipe=recipe)
-                serializer = ShortRecipeSerializer(recipe)
-                return Response(serializer.data, status=201)
-            except IntegrityError:
-                return Response(
-                    {'detail': 'Рецепт уже добавлен в список покупок'},
-                    status=400,
-                )
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                favorite = ShoppingCart.objects.get(user=user, recipe=recipe)
-                favorite.delete()
-                return Response(status=204)
-            except ShoppingCart.DoesNotExist:
-                return Response(
-                    {'detail': 'Рецепт не найден в списке покупок'},
-                    status=400,
-                )
+        return self.handle_action(
+            request, ShoppingCart, pk,
+            'Рецепт уже добавлен в список покупок',
+            'Рецепт не найден в списке покупок',
+        )
 
     @action(
         detail=False,
