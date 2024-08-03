@@ -141,9 +141,10 @@ dmypy.json
 static/
 media/
 
-# ruff
+# tools
 .ruff_cache/
 ruff.toml
+isort.cfg
 
 # macos
 .DS_Store

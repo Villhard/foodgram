@@ -1,26 +1,124 @@
 from io import StringIO
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework import viewsets, mixins
-from django.db import models
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import action
-from django.db.utils import IntegrityError
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
-from api.serializers import (
-    TagSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-    ShortRecipeSerializer,
-)
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
-from favorites.models import Favorite
-from shopping.models import ShoppingCart
+from django.contrib.auth import get_user_model
+from django.db import models
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet as DjoserViewSet
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from api.filters import IngredientFilter, RecipeFilter
+from api.mixins import BaseRecipeAction
 from api.permissions import IsAuthorOrReadOnly
-from api.filters import RecipeFilter, IngredientFilter
+from api.serializers import (AvatarSerializer, ExtendedCustomUserSerializer,
+                             IngredientSerializer, RecipeSerializer,
+                             TagSerializer)
 from backend.settings import HOST
+from favorites.models import Favorite
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from shopping.models import ShoppingCart
+from users.models import Subscription
+
+User = get_user_model()
+
+
+class UserViewSet(DjoserViewSet):
+    @action(
+        methods=('get',),
+        detail=False,
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=('put', 'delete'),
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='me/avatar',
+    )
+    def avatar(self, request):
+        user = request.user
+
+        if request.method == 'PUT':
+            serializer = AvatarSerializer(data=request.data)
+            if serializer.is_valid():
+                user.avatar = serializer.validated_data['avatar']
+                user.save()
+                return Response(
+                    {'avatar': user.avatar.url}, status=status.HTTP_200_OK
+                )
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.avatar = None
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        methods=('get',),
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        serializer_class=ExtendedCustomUserSerializer,
+        url_path='subscriptions',
+    )
+    def subscriptions(self, request):
+        user = request.user
+
+        subscriptions = Subscription.objects.filter(follower=user).values_list(
+            'following', flat=True
+        )
+        following_users = User.objects.filter(id__in=subscriptions)
+
+        paginator = self.paginator
+        result_page = paginator.paginate_queryset(following_users, request)
+
+        serializer = self.get_serializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    @action(
+        methods=('post', 'delete'),
+        detail=True,
+        permission_classes=(IsAuthenticated,),
+        serializer_class=ExtendedCustomUserSerializer,
+        url_path='subscribe',
+    )
+    def subscribe(self, request, id):
+        user = request.user
+        author = self.get_object()
+        subcription = Subscription.objects.filter(
+            follower=user, following=author
+        ).first()
+
+        if request.method == 'POST':
+            if user == author:
+                return Response(
+                    {'detail': 'Нельзя подписаться на самого себя'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if subcription:
+                return Response(
+                    {'detail': 'Вы уже подписаны на этого автора'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            Subscription.objects.create(follower=user, following=author)
+            serializer = self.get_serializer(author)
+            return Response(serializer.data, status=201)
+
+        if subcription:
+            subcription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'detail': 'Вы не подписаны на этого автора'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class TagViewSet(
@@ -45,7 +143,7 @@ class IngredientViewSet(
     filterset_class = IngredientFilter
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
@@ -59,30 +157,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk):
-        if request.method == 'POST':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                Favorite.objects.create(user=user, recipe=recipe)
-                serializer = ShortRecipeSerializer(recipe)
-                return Response(serializer.data, status=201)
-            except IntegrityError:
-                return Response(
-                    {'detail': 'Рецепт уже добавлен в избранное'},
-                    status=400,
-                )
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                favorite = Favorite.objects.get(user=user, recipe=recipe)
-                favorite.delete()
-                return Response(status=204)
-            except Favorite.DoesNotExist:
-                return Response(
-                    {'detail': 'Рецепт не найден в избранном'},
-                    status=400,
-                )
+        return self.handle_action(
+            request,
+            Favorite,
+            pk,
+            'Рецепт уже добавлен в избранное',
+            'Рецепт не найден в избранном',
+        )
 
     @action(
         detail=True,
@@ -91,30 +172,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def shopping_cart(self, request, pk):
-        if request.method == 'POST':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                ShoppingCart.objects.create(user=user, recipe=recipe)
-                serializer = ShortRecipeSerializer(recipe)
-                return Response(serializer.data, status=201)
-            except IntegrityError:
-                return Response(
-                    {'detail': 'Рецепт уже добавлен в список покупок'},
-                    status=400,
-                )
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                favorite = ShoppingCart.objects.get(user=user, recipe=recipe)
-                favorite.delete()
-                return Response(status=204)
-            except ShoppingCart.DoesNotExist:
-                return Response(
-                    {'detail': 'Рецепт не найден в списке покупок'},
-                    status=400,
-                )
+        return self.handle_action(
+            request,
+            ShoppingCart,
+            pk,
+            'Рецепт уже добавлен в список покупок',
+            'Рецепт не найден в списке покупок',
+        )
 
     @action(
         detail=False,

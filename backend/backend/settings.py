@@ -4,15 +4,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = (
-    'django-insecure-eve*-b-#7=%#ss=14^%iz#4#hy7e8+aodrfg33y6k@6%+=te#r'
-)
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG') == 'True'
 
-HOST = 'https://recallcontrol.ru'
+HOST = os.getenv('HOST')
 
-ALLOWED_HOSTS = ['recallcontrol.ru', 'localhost']
+ALLOWED_HOSTS = [host for host in os.getenv('ALLOWED_HOSTS').split(',')]
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
@@ -60,9 +58,9 @@ DJOSER = {
         'user_list': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
     },
     'SERIALIZERS': {
-        'user_create': 'users.serializers.CustomCreateUserSerializer',
-        'user': 'users.serializers.CustomUserSerializer',
-        'current_user': 'users.serializers.CustomUserSerializer',
+        'user_create': 'api.serializers.CustomCreateUserSerializer',
+        'user': 'api.serializers.CustomUserSerializer',
+        'current_user': 'api.serializers.CustomUserSerializer',
     },
 }
 

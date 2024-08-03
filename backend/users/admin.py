@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from users.models import Subscription
 
+from users.models import Subscription
 
 User = get_user_model()
 

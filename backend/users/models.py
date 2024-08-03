@@ -47,7 +47,11 @@ class Subscription(models.Model):
     )
 
     class Meta:
-        unique_together = ('follower', 'following')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['follower', 'following'], name='unique_subscription'
+            )
+        ]
         ordering = ('id',)
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
