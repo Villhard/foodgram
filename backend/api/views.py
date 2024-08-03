@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from io import StringIO
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -59,30 +60,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk):
+        user = request.user
+        recipe = self.get_object()
+        favorite = Favorite.objects.filter(user=user, recipe=recipe).first()
         if request.method == 'POST':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                Favorite.objects.create(user=user, recipe=recipe)
-                serializer = ShortRecipeSerializer(recipe)
-                return Response(serializer.data, status=201)
-            except IntegrityError:
+            if favorite:
                 return Response(
                     {'detail': 'Рецепт уже добавлен в избранное'},
-                    status=400,
+                    status=HTTPStatus.BAD_REQUEST,
                 )
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = self.get_object()
-            try:
-                favorite = Favorite.objects.get(user=user, recipe=recipe)
-                favorite.delete()
-                return Response(status=204)
-            except Favorite.DoesNotExist:
-                return Response(
-                    {'detail': 'Рецепт не найден в избранном'},
-                    status=400,
-                )
+            Favorite.objects.create(user=user, recipe=recipe)
+            serializer = ShortRecipeSerializer(recipe)
+            return Response(
+                serializer.data,
+                status=HTTPStatus.CREATED,
+            )
+
+        if favorite:
+            favorite.delete()
+            return Response(status=HTTPStatus.NO_CONTENT)
+
+        return Response(
+            {'detail': 'Рецепт не найден в избранном'},
+            status=HTTPStatus.BAD_REQUEST,
+        )
 
     @action(
         detail=True,
