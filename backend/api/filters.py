@@ -4,10 +4,10 @@ from recipes.models import Ingredient, Recipe
 
 
 class RecipeFilter(FilterSet):
-    tags = filters.AllValuesMultipleFilter(
+    tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
     )
-    author = filters.BaseInFilter(
+    author = filters.ModelChoiceFilter(
         field_name='author',
         lookup_expr='in',
     )
