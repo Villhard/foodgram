@@ -12,17 +12,17 @@ from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.mixins import BaseRecipeAction
+from api.paginations import CustomPagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (AvatarSerializer, ExtendedCustomUserSerializer,
                              IngredientSerializer, RecipeSerializer,
                              TagSerializer)
+from api.utils import Base52
 from backend.settings import HOST
 from favorites.models import Favorite
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from shopping.models import ShoppingCart
 from users.models import Subscription
-from api.paginations import CustomPagination
-from api.utils import Base52
 
 User = get_user_model()
 
@@ -225,18 +225,6 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
         get_object_or_404(Recipe, id=pk)
         short_pk = Base52.to_base52(pk)
         return Response(
-            {'short-link': f'{HOST}/recipes/s/{short_pk}'}, status=status.HTTP_200_OK
+            {'short-link': f'{HOST}/recipes/s/{short_pk}'},
+            status=status.HTTP_200_OK
         )
-
-    @action(
-        detail=False,
-        methods=['GET'],
-        url_path=r's/(?P<link>\w+)',
-    )
-    def get_recipe_by_short_link(self, request, link):
-        print(link)
-        print(request)
-        recipe_id = Base52.from_base52(link)
-        print(recipe_id)
-        get_object_or_404(Recipe, id=recipe_id)
-        return redirect(f'{HOST}/recipes/{recipe_id}')
