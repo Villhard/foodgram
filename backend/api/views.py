@@ -225,6 +225,6 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
         get_object_or_404(Recipe, id=pk)
         short_pk = Base52.to_base52(pk)
         return Response(
-            {'short-link': f'{HOST}/recipes/s/{short_pk}'},
+            {'short-link': f'{HOST}/rec/{short_pk}'},
             status=status.HTTP_200_OK
         )
