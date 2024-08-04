@@ -2,6 +2,7 @@ from io import StringIO
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
@@ -210,7 +211,8 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
                 f'{ingredient["total_amount"]} '
                 f'{ingredient["ingredient__measurement_unit"]}\n'
             )
-        response = Response(output.getvalue(), content_type='text/plain')
+        content = output.getvalue()
+        response = HttpResponse(content, content_type='text/plain')
         response['Content-Disposition'] = (
             'attachment; filename="shopping_cart.txt"'
         )
