@@ -2,7 +2,7 @@ from io import StringIO
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
 from rest_framework import mixins, status, viewsets
@@ -22,6 +22,7 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from shopping.models import ShoppingCart
 from users.models import Subscription
 from api.paginations import CustomPagination
+from api.utils import Base52
 
 User = get_user_model()
 
@@ -222,6 +223,20 @@ class RecipeViewSet(BaseRecipeAction, viewsets.ModelViewSet):
     )
     def get_link(self, request, pk):
         get_object_or_404(Recipe, id=pk)
+        short_pk = Base52.to_base52(pk)
         return Response(
-            {'short-link': f'{HOST}/recipes/{pk}'}, status=status.HTTP_200_OK
+            {'short-link': f'{HOST}/recipes/s/{short_pk}'}, status=status.HTTP_200_OK
         )
+
+    @action(
+        detail=False,
+        methods=['GET'],
+        url_path=r's/(?P<link>\w+)',
+    )
+    def get_recipe_by_short_link(self, request, link):
+        print(link)
+        print(request)
+        recipe_id = Base52.from_base52(link)
+        print(recipe_id)
+        get_object_or_404(Recipe, id=recipe_id)
+        return redirect(f'{HOST}/recipes/{recipe_id}')
