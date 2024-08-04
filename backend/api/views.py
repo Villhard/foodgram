@@ -3,7 +3,7 @@ from io import StringIO
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
 from rest_framework import mixins, status, viewsets
